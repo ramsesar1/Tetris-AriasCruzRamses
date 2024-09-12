@@ -34,6 +34,15 @@
     [[7,7,7],[0,0,7]], // pieza J
     ];
 
+    //Crear pieza
+    function createPiece(){
+      const type = Math.floor(Math.random() * pieces.length);
+      return {
+        matrix: pieces[type],
+        pos: {x: Math.floor(cols/2)-1,y:0},
+      };
+    }
+
     //limpiar el canvas
     function clearCanvas(){
       ctx.clearRect(0,0,canvas.width,canvas.height);
