@@ -32,14 +32,35 @@
 
     //piezas
     const pieces =[
-    [[1,1,1,1]], //pieza I
-    [[0,2,0],[2,2,2]], //pieza T
+    [[0,0,0,0],[1,1,1,1],[0,0,0,0],[0,0,0,0]], //pieza I
+    [[0,2,0],[2,2,2],[0,0,0]], //pieza T
     [[3,3],[3,3]], // pieza cubo
-    [[0,4,4],[4,4,0]], // pieza S
-    [[5,5,0],[0,5,5]], // pieza Z
-    [[6,6,6],[6,0,0]], // pieza L
-    [[7,7,7],[0,0,7]], // pieza J
+    [[0,4,4],[4,4,0],[0,0,0]], // pieza S
+    [[5,5,0],[0,5,5],[0,0,0]], // pieza Z
+    [[6,6,6],[6,0,0],[0,0,0]], // pieza L
+    [[7,7,7],[0,0,7],[0,0,0]], // pieza J
     ];
+
+    //rotacion de piezas
+    function rotate(matrix){
+      const N = matrix.length;
+      const M = matrix[0].length;
+      const result = [];
+
+      for (let i = 0; i < M; i++){
+        result.push(new Array(N).fill(0));
+      }
+
+//      for (let i = 0; i < N; i++){
+//        result.push(new Array(N).fill(0));
+//      }
+      for(let y = 0; y < N; y++){
+        for(let x = 0; x < N; x++){
+          result[x][N - y - 1] = matrix[y][x];
+        }
+      }
+      return result;
+    }
 
     //Crear pieza
     function createPiece(){
@@ -119,20 +140,7 @@
     });
 
 
-    //rotacion de piezas
-    function rotate(matrix){
-      const N = matrix.length;
-      const result = [];
-      for (let i = 0; i < N; i++){
-        result.push(new Array(N).fill(0));
-      }
-      for(let y = 0; y < N; y++){
-        for(let x = 0; x < N; x++){
-          result[x][N - y - 1] = matrix[y][x];
-        }
-      }
-      return result;
-    }
+
 
     //movimiento horizontal
     function move(dir){
