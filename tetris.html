@@ -56,6 +56,16 @@
       });
     }
 
+    //Agrega pieza
+    function merge(grid,piece){
+      piece.matrix.forEach((row, y) => {
+        row.forEach((value, x)=> {
+          if(value !== 0){
+            grid[piece.pos.y + y][piece.pos.x + x] = value;
+          }
+        });
+      });
+    }
 
 
 
@@ -86,9 +96,9 @@
 
     //rotacion de piezas
     function rotate(matrix){
-      const N = matrix.lengthM
+      const N = matrix.length
       const resuilt = [];
-      for (let i = 0; i < N< i++){
+      for (let i = 0; i < N; i++){
         result.push(new Array(N).fill(0));
       }
       for(let y = 0; y < N; y++){
