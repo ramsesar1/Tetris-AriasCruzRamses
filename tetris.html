@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Tetris Reach</title>
+  <title>Atomic tetris</title>
 <style>
   canvas{
-    background-color: #8000;
+    background-color: #000;
     display: block;
     margin: 0 auto;
   }
@@ -17,11 +17,18 @@
 
   <script>
     const canvas = document.getElementById('tetris');
-    const ctxd = canvas.getContext('2d');
+    const ctx = canvas.getContext('2d');
 
     const rows = 20;
     const cols = 10;
     const block_size = 30;
+
+
+    //color temporal de las piezas
+    const colors = [
+      null,
+      'cyan','blue','orange','yellow','green','purple','red'
+    ];
 
     //piezas
     const pieces =[
@@ -74,6 +81,24 @@
       ctx.clearRect(0,0,canvas.width,canvas.height);
     }
 
+
+
+    //colision de piezas
+    function collide(grid, piece){
+      for (let y = 0; y < piece.matrix.length; y++){
+        for(let x = 0; x < piece.matrix[y].length; x++){
+          if (piece.matrix[y][x] !== 0 && 
+            (grid[piece.pos.y + y] && grid[piece.pos.y + y][piece.pos.x + x]) !== 0){
+              return true;
+            }
+        }
+      }
+      return false;
+    }
+
+
+
+
     //Controles
     document.addEventListener('keydown',event =>{
       if (event.key === 'ArrowLeft'){
@@ -96,8 +121,8 @@
 
     //rotacion de piezas
     function rotate(matrix){
-      const N = matrix.length
-      const resuilt = [];
+      const N = matrix.length;
+      const result = [];
       for (let i = 0; i < N; i++){
         result.push(new Array(N).fill(0));
       }
@@ -112,10 +137,38 @@
     //movimiento horizontal
     function move(dir){
       player.pos.x += dir;
-      if (collide(grid)){
+      if (collide(grid, player)){
         player.pos.x -= dir;
       }
     }
+
+
+    //eliminacion de hileras
+    function sweep(grid){
+      outer: for (let y = grid.length -1; y >= 0; y--){
+        for(let x = 0; x<grid[y].length; x++){
+          if(grid[y][x] === 0){
+            continue outer;
+          }
+        }
+        const row = grid.splice(y,1)[0].fill(0);
+        grid.unshift(row);
+      }
+    }
+
+
+    //movimiento vertical
+    function drop() {
+      player.pos.y++;
+      if (collide(grid,player)){
+        player.pos.y--;
+        merge(grid,player);
+        sweep(grid);
+        player = createPiece();
+      }
+      dropCounter = 0;
+    }
+
     //-----------------------------------actualizar juego--------------------*//
 
     let dropCounter = 0;
@@ -132,8 +185,10 @@
       }
 
       clearCanvas();
+      drawGrid(grid);
+
       drawPiece(player);
-      drawPiece({matrix: grid, pos: {x: 0, y: 0}});
+
 
       requestAnimationFrame(update);
 
@@ -155,10 +210,23 @@
       return grid;
     }
 
+    function drawGrid(grid){
+      grid.forEach((row, y) => {
+        row.forEach((value, x) =>{
+          if(value !== 0){
+            ctx.fillStyle = colors[value];
+            ctx.fillRect(x*block_size, y * block_size, block_size, block_size);
+          }
+        });
+      });
+    }
+
+
     //iniciar el juego
     let grid = createGrid();
     let player = createPiece();
     
+    update();
   </script>
   
 </body>
