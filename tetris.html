@@ -152,16 +152,25 @@
 
 
     //eliminacion de hileras
+    
     function sweep(grid){
-      outer: for (let y = grid.length -1; y >= 0; y--){
+      let linesCrealed = 0;
+      for (let y = grid.length -1; y >= 0; y--){
+        let isRowComplete = true;
         for(let x = 0; x<grid[y].length; x++){
           if(grid[y][x] === 0){
-            continue outer;
+            isRowComplete = false;
+            break;
           }
         }
+        if (isRowComplete){
         const row = grid.splice(y,1)[0].fill(0);
         grid.unshift(row);
+        linesCrealed++;
+        y++;
       }
+    }
+    return linesCrealed;
     }
 
 
