@@ -28,3 +28,9 @@ body {
     background-color: #222;
   }
   
+  #hold {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background-color: #222;
+  }

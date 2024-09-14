@@ -16,6 +16,7 @@
 <body>
   <canvas id="tetris" width="300" height="600"></canvas>
   <canvas id="next" width="120" height="120"></canvas>
+  <canvas id="hold" width="120" height="120"></canvas>
 
   <audio id="background-music" src="ingame.mp3" loop></audio>
 
@@ -26,6 +27,9 @@
 
     const nextCanvas = document.getElementById('next');
     const nextCtx = nextCanvas.getContext('2d');
+
+    const holdCanvas = document.getElementById('hold');
+    const holdCtx = holdCanvas.getContext('2d');
 
     const rows = 20;
     const cols = 10;
@@ -162,6 +166,8 @@
           if(collide(grid, player)){
             player.matrix = rotate(player.matrix)
           }
+        } else if (event.key === 'c' || event.key === 'C'){
+          holdPiece();
         }
     });
 
@@ -215,9 +221,49 @@
 
         drawNextPiece(nextPiece);
 
+        canHold = true;
       }
       dropCounter = 0;
     }
+    
+
+    //----------------------------------Contenedor de piezas----------------------------*//
+
+    let heldPiece = null;
+    let canHold = true;
+
+    function holdPiece(){
+      if(canHold){
+        if(heldPiece === null){
+          heldPiece = player;
+          player = nextPiece;
+          nextPiece = createPiece();
+        } else {
+          const temp = player;
+          player = heldPiece;
+          heldPiece = temp;
+        }
+        player.pos = {x: Math.floor(cols/2)-1, y:0};
+        canHold = false;
+        drawHeldPiece();
+      }
+    }
+
+    function drawHeldPiece(){
+      holdCtx.clearRect(0,0, holdCanvas.width, holdCanvas.height);
+      if (heldPiece){
+        heldPiece.matrix.forEach((row, y) => {
+          row.forEach((value,x) => {
+            if(value !== 0){
+              holdCtx.fillStyle = colors[value];
+              holdCtx.fillRect(x*block_size, y*block_size, block_size, block_size, block_size)
+            }
+          });
+        });
+      }
+    }
+
+
 
     //-----------------------------------actualizar juego--------------------*//
 
@@ -236,9 +282,9 @@
 
       clearCanvas();
       drawGrid(grid);
-
       drawPiece(player);
-
+      drawHeldPiece(nextPiece);
+      drawHeldPiece();
 
       requestAnimationFrame(update);
 
@@ -328,6 +374,7 @@
     attemptPlayMusic();
 
     drawNextPiece(nextPiece);
+    drawHeldPiece();
 
     update();
   </script>
