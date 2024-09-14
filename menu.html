@@ -5,41 +5,77 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Menú Principal</title>
   <link rel="stylesheet" href="tetris.css">
+  <style>
+    canvas {
+      display: block;
+      margin: 0 auto;
+    }
+  </style>
 </head>
 <body>
-  <div id="menu-screen">
-    <h1>Menú Principal</h1>
-    <button id="play-button">Jugar normal</button>
-    <button id="play-butotn-2">Jugar supervivencia</button>
-    <button id="options-button">Como jugar</button>
-    <button id="credits-button">Créditos</button>
-    <button id="exit-button">Salir</button>
-  </div>
-
+  <canvas id="menu-canvas" width="800" height="600"></canvas>
   <audio id="menu-music" src="Menu.mp3" loop></audio> 
 
   <script>
+    const canvas = document.getElementById('menu-canvas');
+    const ctx = canvas.getContext('2d');
     const menuMusic = document.getElementById('menu-music');
     let musicStarted = false;
-    let canPlayMusic = true;
 
-    function attemptPlayMusic() {
-        if (!musicStarted) {
-            menuMusic.play().then(() => {
-            musicStarted = true;
-            console.log('Menu music started successfully');
-            }).catch(error => {
-            console.error('Error playing menu music:', error);
-            addInteractionListeners();
-            });
-        }
+    //array de botones
+    const buttons = [
+      { text: 'Jugar normal', action: () => window.location.href = 'tetris.html' },
+      { text: 'Jugar supervivencia', action: () => console.log('Supervivencia mode not implemented') },
+      { text: 'Como jugar', action: () => console.log('How to play not implemented') },
+      { text: 'Créditos', action: () => console.log('Credits not implemented') },
+      { text: 'Salir', action: () => window.close() }
+    ];
+
+    function drawMenu() {
+      ctx.fillStyle = '#000';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      ctx.fillStyle = '#fff';
+      ctx.font = '48px Arial';
+      ctx.textAlign = 'center';
+      ctx.fillText('Menú Principal', canvas.width / 2, 100);
+
+      buttons.forEach((button, index) => {
+        ctx.fillStyle = '#444';
+        ctx.fillRect(250, 150 + index * 70, 300, 50);
+        
+        ctx.fillStyle = '#fff';
+        ctx.font = '24px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText(button.text, canvas.width / 2, 185 + index * 70);
+      });
     }
 
-    // Redirige a tetris.html
-    document.getElementById('play-button').addEventListener('click', () => {
-      window.location.href = 'tetris.html'; 
-    });
+    function handleClick(event) {
+      const rect = canvas.getBoundingClientRect();
+      const x = event.clientX - rect.left;
+      const y = event.clientY - rect.top;
 
+      buttons.forEach((button, index) => {
+        if (x >= 250 && x <= 550 && y >= 150 + index * 70 && y <= 200 + index * 70) {
+          button.action();
+        }
+      });
+    }
+
+    canvas.addEventListener('click', handleClick);
+
+    function attemptPlayMusic() {
+      if (!musicStarted) {
+        menuMusic.play().then(() => {
+          musicStarted = true;
+          console.log('Menu music started successfully');
+        }).catch(error => {
+          console.error('Error playing menu music:', error);
+          addInteractionListeners();
+        });
+      }
+    }
 
     function addInteractionListeners() {
       ['click', 'touchstart', 'keydown', 'mousemove'].forEach(eventType => {
@@ -59,17 +95,15 @@
       });
     }
 
-
-
-    window.addEventListener('load', attemptPlayMusic);
+    window.addEventListener('load', () => {
+      drawMenu();
+      attemptPlayMusic();
+    });
 
     menuMusic.addEventListener('play', () => {
       musicStarted = true;
       removeInteractionListeners();
     });
-
-
   </script>
-  
 </body>
 </html>
