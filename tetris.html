@@ -16,9 +16,13 @@
 <body>
   <canvas id="tetris" width="300" height="600"></canvas>
   <canvas id="next" width="120" height="120"></canvas>
+
+  <audio id="background-music" src="ingame.mp3" loop></audio>
+
   <script>
     const canvas = document.getElementById('tetris');
     const ctx = canvas.getContext('2d');
+    const backgroundMusic = document.getElementById('background-music');
 
     const nextCanvas = document.getElementById('next');
     const nextCtx = nextCanvas.getContext('2d');
@@ -245,6 +249,51 @@
 
 
 
+    //---------------------------------logica de musica------------------------------------**//
+
+    let musicStarted = false;
+    let canPlayMusic = true;
+
+    function attemptPlayMusic() {
+      if (canPlayMusic && !musicStarted) {
+        backgroundMusic.play().then(() => {
+          musicStarted = true;
+          console.log('Game music started successfully');
+        }).catch(error => {
+          console.error('Error playing game music:', error);
+          canPlayMusic = false;
+          addInteractionListeners();
+        });
+      }
+    }
+
+    function addInteractionListeners() {
+      ['click', 'touchstart', 'keydown', 'mousemove'].forEach(eventType => {
+        document.addEventListener(eventType, playMusicOnInteraction, { once: true });
+      });
+    }
+
+    function playMusicOnInteraction() {
+      if (!musicStarted) {
+        canPlayMusic = true;
+        attemptPlayMusic();
+      }
+    }
+
+    function removeInteractionListeners() {
+      ['click', 'touchstart', 'keydown', 'mousemove'].forEach(eventType => {
+        document.removeEventListener(eventType, playMusicOnInteraction);
+      });
+    }
+
+    window.addEventListener('load', attemptPlayMusic);
+
+    backgroundMusic.addEventListener('play', () => {
+      musicStarted = true;
+      removeInteractionListeners();
+    });
+
+
 
     //-----------------------------------cuadricula--------------------*//
 
@@ -276,6 +325,7 @@
     let player = createPiece();
     let nextPiece = createPiece();
     
+    attemptPlayMusic();
 
     drawNextPiece(nextPiece);
 

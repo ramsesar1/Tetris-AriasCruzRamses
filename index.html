@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pantalla de Inicio</title>
+  <link rel="stylesheet" href="tetris.css">
+</head>
+<body>
+  <div id="start-screen">
+    <h1>Atomic Tetris</h1>
+    <button id="start-button">Presiona Start</button>
+  </div>
+
+  <audio id="background-music" src="start.mp3" preload="auto"></audio>
+
+  <script>
+    document.getElementById('start-button').addEventListener('click', () => {
+      window.location.href = 'menu.html'; 
+    });
+
+    const backgroundMusic = document.getElementById('background-music');
+    let musicStarted = false;
+    let canPlayMusic = true;
+
+    function attemptPlayMusic() {
+      if (canPlayMusic && !musicStarted) {
+        backgroundMusic.play().then(() => {
+          musicStarted = true;
+          console.log('Music started successfully');
+        }).catch(error => {
+          console.error('Error playing music:', error);
+          canPlayMusic = false;
+          addInteractionListeners();
+        });
+      }
+    }
+
+    function addInteractionListeners() {
+      ['click', 'touchstart', 'keydown', 'mousemove'].forEach(eventType => {
+        document.addEventListener(eventType, playMusicOnInteraction, { once: true });
+      });
+    }
+
+    function playMusicOnInteraction() {
+      if (!musicStarted) {
+        canPlayMusic = true;
+        attemptPlayMusic();
+      }
+    }
+
+    function removeInteractionListeners() {
+      ['click', 'touchstart', 'keydown', 'mousemove'].forEach(eventType => {
+        document.removeEventListener(eventType, playMusicOnInteraction);
+      });
+    }
+    // Inicia la música un segundo después de cargar la página
+
+    window.addEventListener('load', () => {
+      setTimeout(attemptPlayMusic, 1000);
+    });
+
+    backgroundMusic.addEventListener('play', () => {
+      musicStarted = true;
+      removeInteractionListeners();
+    });
+    // Loop de música con retraso de 5 segundos
+
+    backgroundMusic.addEventListener('ended', () => {
+      setTimeout(() => {
+        backgroundMusic.currentTime = 0;
+        attemptPlayMusic();
+      }, 5000);
+    });
+  </script>
+</body>
+</html>

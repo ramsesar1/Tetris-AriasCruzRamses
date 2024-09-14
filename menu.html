@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Menú Principal</title>
+  <link rel="stylesheet" href="tetris.css">
+</head>
+<body>
+  <div id="menu-screen">
+    <h1>Menú Principal</h1>
+    <button id="play-button">Jugar</button>
+    <button id="options-button">Opciones</button>
+    <button id="credits-button">Créditos</button>
+    <button id="exit-button">Salir</button>
+  </div>
+
+  <audio id="menu-music" src="Menu.mp3" loop></audio> 
+
+  <script>
+    const menuMusic = document.getElementById('menu-music');
+    let musicStarted = false;
+    let canPlayMusic = true;
+
+    function attemptPlayMusic() {
+        if (!musicStarted) {
+            menuMusic.play().then(() => {
+            musicStarted = true;
+            console.log('Menu music started successfully');
+            }).catch(error => {
+            console.error('Error playing menu music:', error);
+            addInteractionListeners();
+            });
+        }
+    }
+
+    // Redirige a game.html
+    document.getElementById('play-button').addEventListener('click', () => {
+      window.location.href = 'tetris.html'; 
+    });
+
+
+    function addInteractionListeners() {
+      ['click', 'touchstart', 'keydown', 'mousemove'].forEach(eventType => {
+        document.addEventListener(eventType, playMusicOnInteraction, { once: true });
+      });
+    }
+
+    function playMusicOnInteraction() {
+      if (!musicStarted) {
+        attemptPlayMusic();
+      }
+    }
+
+    function removeInteractionListeners() {
+      ['click', 'touchstart', 'keydown', 'mousemove'].forEach(eventType => {
+        document.removeEventListener(eventType, playMusicOnInteraction);
+      });
+    }
+
+
+
+    window.addEventListener('load', attemptPlayMusic);
+
+    menuMusic.addEventListener('play', () => {
+      musicStarted = true;
+      removeInteractionListeners();
+    });
+
+
+  </script>
+  
+</body>
+</html>
