@@ -1,4 +1,13 @@
-canvas {
+body {
+    text-align: center;
+    margin-top:500px;
+    background-image: url('background.png'); 
+    background-size: cover; 
+    background-position: center; 
+    background-repeat: no-repeat; 
+  }
+  
+  canvas {
     background-color: #000;
     display: block;
     margin: 0 auto;
@@ -17,10 +26,5 @@ canvas {
     top: 10px;
     right: 10px;
     background-color: #222;
-  }
-  
-  body {
-    text-align: center;
-    margin-top: 20px;
   }
   
