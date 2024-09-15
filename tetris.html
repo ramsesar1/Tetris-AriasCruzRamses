@@ -220,9 +220,11 @@
     }
     if (linesCrealed === 4){
       tetrisCount++;
+      addPowerUp();
       drawCounter();
     }
 
+    drawPowerUps();
 
     return linesCrealed;
     }
@@ -376,6 +378,50 @@
       removeInteractionListeners();
     });
 
+    //------------------------------------Bomba------------------------------------//
+
+    let powerUpCount = 0;
+    const maxPowerUps = 3;
+
+    function drawPowerUps(){
+      counterCtx.clearRect(0,50,counterCanvas.width, counterCanvas.height);
+      
+      for(let i = 0; i< powerUpCount; i++){
+        counterCtx.fillStyle = 'red';
+        counterCtx.fillRect(10 + i * 40, 50, 30, 30,);
+      }
+    }
+
+    function addPowerUp(){
+      if (powerUpCount < maxPowerUps){
+        powerUpCount++;
+        drawPowerUps();
+      }
+    }
+
+    function usePowerUp(){
+      if(powerUpCount > 0){
+        powerUpCount--;
+        clearGrid();
+        drawPowerUps();
+      }
+    }
+
+    //limpia la cuadricula con la bomba
+    function clearGrid(){
+      grid.forEach((row, y) => {
+        row.fill(0);
+      });
+    }
+
+    //activar bomba
+    document.addEventListener('keydown', event => {
+      if (event.key === 'b' || event.key === 'B'){
+        usePowerUp();
+      }
+    });
+
+
 
 
     //-----------------------------------cuadricula--------------------*//
@@ -413,6 +459,7 @@
     drawNextPiece(nextPiece);
     drawHeldPiece();
     drawCounter();
+    drawPowerUps();
     update();
   </script>
   
