@@ -20,6 +20,7 @@
   <canvas id="counter" width="180" height="120"></canvas>
   <canvas id="scoreCanvas" width="180" height="120"></canvas>
 
+  
 
   <audio id="piecetouchdown-sfx" src="sounds/mp3/tankfire.mp3" ></audio>
   <audio id="prepareforbattle-sfx" src="sounds/mp3/cached_v_prepare.mp3" ></audio>
@@ -27,11 +28,17 @@
   <audio id="nuke-sfx" src="sounds/mp3/cached_nukeblast.mp3"></audio>
 
 
+
   
   <audio id="gameover-music" src="gameover.mp3" loop></audio>
   <audio id="background-music" src="ingame.mp3" loop></audio>
 
   <script>
+
+    const blockImage = new Image();
+    blockImage.src = "images/icons/ladrillos.jpg"
+
+
     const canvas = document.getElementById('tetris');
     const ctx = canvas.getContext('2d');
     const backgroundMusic = document.getElementById('background-music');
@@ -136,6 +143,32 @@
     }
 
     //dibujar la pieza
+
+
+    function drawPiece(piece) {
+      piece.matrix.forEach((row, y) => {
+        row.forEach((value, x) => {
+          if (value !== 0) {
+            // Calculate the y-coordinate on the image (based on the piece value)
+            const imgY = (value - 1) * 25;
+            
+            // Draw the specific part of the image for each square
+            ctx.drawImage(
+              blockImage,
+              0, imgY,       // Source x, y on the image
+              25, 25,        // Width and height of the source (each square is 25x25)
+              (piece.pos.x + x) * block_size, // Destination x
+              (piece.pos.y + y) * block_size, // Destination y
+              block_size, block_size // Size to draw on the canvas
+            );
+          }
+        });
+      });
+    }
+
+
+
+    /*
     function drawPiece(piece){
       piece.matrix.forEach((row,y) => {
         row.forEach((value,x) => {
@@ -147,7 +180,7 @@
         });
       });
     }
-
+    */
     //Agrega pieza
     function merge(grid,piece){
       piece.matrix.forEach((row, y) => {
@@ -463,6 +496,14 @@
       });
     }
 
+    blockImage.onload = function() {
+      drawNextPiece(nextPiece);
+      drawHeldPiece();
+      drawCounter();
+      drawPowerUps();
+      animationId = requestAnimationFrame(update); // Start game animation
+    };
+
     window.addEventListener('load', attemptPlayMusic);
 
     backgroundMusic.addEventListener('play', () => {
@@ -589,6 +630,25 @@
       return grid;
     }
 
+    function drawGrid(grid) {
+      grid.forEach((row, y) => {
+        row.forEach((value, x) => {
+          if (value !== 0) {
+            const imgY = (value - 1) * 25;
+            ctx.drawImage(
+              blockImage,
+              0, imgY,       // Source x, y on the image
+              25, 25,        // Width and height of the source
+              x * block_size, // Destination x
+              y * block_size, // Destination y
+              block_size, block_size // Size to draw on the canvas
+            );
+          }
+        });
+      });
+    }
+    /*
+
     function drawGrid(grid){
       grid.forEach((row, y) => {
         row.forEach((value, x) =>{
@@ -599,7 +659,7 @@
         });
       });
     }
-
+    */
 
     //iniciar el juego
     let grid = createGrid();
