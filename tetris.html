@@ -38,6 +38,8 @@
     const blockImage = new Image();
     blockImage.src = "images/icons/ladrillos.jpg"
 
+    const nukeIconImage = new Image();
+    nukeIconImage.src = "images/icons/nukeicon.png" 
 
     const canvas = document.getElementById('tetris');
     const ctx = canvas.getContext('2d');
@@ -126,7 +128,30 @@
 
     //----------------------------------Siguiente pieza----------------------*//
 
-    //dibujar pieza siguiente
+    //dibujar pieza siguiente ahora con textura de bloques
+
+    function drawNextPiece(piece) {
+      nextCtx.clearRect(0, 0, nextCanvas.width, nextCanvas.height);
+      piece.matrix.forEach((row, y) => {
+        row.forEach((value, x) => {
+          if (value !== 0) {
+            const imgY = (value - 1) * 25; 
+            nextCtx.drawImage(
+              blockImage, 
+              0, imgY,  
+              25, 25,  
+              x * block_size, y * block_size,  
+              block_size, block_size         
+            );
+          }
+        });
+      });
+    }
+
+
+
+
+    /*
     function drawNextPiece(piece){
       //limpiar el canvas de la siguiente
       nextCtx.clearRect(0, 0, nextCanvas.width, nextCanvas.height);
@@ -141,25 +166,24 @@
         });
       });
     }
-
-    //dibujar la pieza
+    */
+    //dibujar la pieza ahora con la textura de bloques
 
 
     function drawPiece(piece) {
       piece.matrix.forEach((row, y) => {
         row.forEach((value, x) => {
           if (value !== 0) {
-            // Calculate the y-coordinate on the image (based on the piece value)
+            // calcula los pixeles en Y 
             const imgY = (value - 1) * 25;
             
-            // Draw the specific part of the image for each square
             ctx.drawImage(
               blockImage,
-              0, imgY,       // Source x, y on the image
-              25, 25,        // Width and height of the source (each square is 25x25)
-              (piece.pos.x + x) * block_size, // Destination x
-              (piece.pos.y + y) * block_size, // Destination y
-              block_size, block_size // Size to draw on the canvas
+              0, imgY,      
+              25, 25,        
+              (piece.pos.x + x) * block_size, 
+              (piece.pos.y + y) * block_size, 
+              block_size, block_size 
             );
           }
         });
@@ -218,25 +242,26 @@
 
 
     //Controles
-    document.addEventListener('keydown',event =>{
-      if (event.key === 'ArrowLeft'){
-        move(-1);
-      }
-        else if(event.key === 'ArrowRight'){
-          move(1);
+    document.addEventListener('keydown', event => {
+        if (event.key === 'ArrowLeft' || event.key === 'a' || event.key === 'A') {
+            move(-1);  
         }
-        else if(event.key === 'ArrowDown'){
-          drop();
+        else if (event.key === 'ArrowRight' || event.key === 'd' || event.key === 'D') {
+            move(1);   
         }
-        else if(event.key === 'ArrowUp'){
-          player.matrix = rotate(player.matrix);
-          if(collide(grid, player)){
-            player.matrix = rotate(player.matrix)
-          }
-        } else if (event.key === 'c' || event.key === 'C'){
-          holdPiece();
+        else if (event.key === 'ArrowDown' || event.key === 's' || event.key === 'S') {
+            drop();    
+        }
+        else if (event.key === 'ArrowUp' || event.key === 'w' || event.key === 'W') {
+            player.matrix = rotate(player.matrix);  
+            if (collide(grid, player)) {
+                player.matrix = rotate(player.matrix); 
+            }
+        } else if (event.key === 'c' || event.key === 'C') {
+            holdPiece();  
         }
     });
+
 
 
 
@@ -365,6 +390,32 @@
       }
     }
 
+    // pieza mantenia ahora con texturas
+
+    function drawHeldPiece() {
+      holdCtx.clearRect(0, 0, holdCanvas.width, holdCanvas.height);
+      if (heldPiece) {
+        heldPiece.matrix.forEach((row, y) => {
+          row.forEach((value, x) => {
+            if (value !== 0) {
+              const imgY = (value - 1) * 25; 
+              holdCtx.drawImage(
+                blockImage,
+                0, imgY,  
+                25, 25,   
+                x * block_size, y * block_size,  
+                block_size, block_size         
+              );
+            }
+          });
+        });
+      }
+    }
+
+
+
+
+    /*
     function drawHeldPiece(){
       holdCtx.clearRect(0,0, holdCanvas.width, holdCanvas.height);
       if (heldPiece){
@@ -378,7 +429,7 @@
         });
       }
     }
-
+    */
 
 
     //-----------------------------------actualizar juego--------------------*//
@@ -501,7 +552,7 @@
       drawHeldPiece();
       drawCounter();
       drawPowerUps();
-      animationId = requestAnimationFrame(update); // Start game animation
+      animationId = requestAnimationFrame(update); 
     };
 
     window.addEventListener('load', attemptPlayMusic);
@@ -515,13 +566,25 @@
 
     let powerUpCount = 0;
     const maxPowerUps = 3;
+    
+    let nukeImage;
+    let flashOverlay;
+
+    nukeImage = new Image();
+    nukeImage.src = 'images/icons/nuke.png';
+    flashOverlay = document.createElement('div');
+    flashOverlay.id = 'flashOverlay';
+    document.body.appendChild(flashOverlay);
+
+
 
     function drawPowerUps(){
       counterCtx.clearRect(0,50,counterCanvas.width, counterCanvas.height);
       
       for(let i = 0; i< powerUpCount; i++){
-        counterCtx.fillStyle = 'red';
-        counterCtx.fillRect(10 + i * 40, 50, 30, 30,);
+        counterCtx.drawImage(nukeIconImage, 10 + i * 40,50,30,30);
+   //     counterCtx.fillStyle = 'red';
+   //     counterCtx.fillRect(10 + i * 40, 50, 30, 30,);
       }
     }
 
@@ -538,7 +601,20 @@
         clearGrid();
         drawPowerUps();
         playNukeSfx();
+        flashEffect();
+        setTimeout(showNukeImage, 50);
       }
+    }
+
+    function flashEffect() {
+      flashOverlay.style.display = 'block';
+      flashOverlay.style.opacity = '0.5';
+      setTimeout(() => {
+        flashOverlay.style.opacity = '0';
+      }, 50);
+      setTimeout(() => {
+        flashOverlay.style.display = 'none';
+      }, 500);
     }
 
     //limpia la cuadricula con la bomba
@@ -554,6 +630,45 @@
         usePowerUp();
       }
     });
+
+    function showNukeImage() {
+      const nukeElement = document.createElement('div');
+      nukeElement.id = 'nukeImage';
+      nukeElement.style.backgroundImage = `url(${nukeImage.src})`;
+      nukeElement.style.position = 'fixed';
+      nukeElement.style.top = '0';
+      nukeElement.style.left = '0';
+      nukeElement.style.width = '100%';
+      nukeElement.style.height = '100%';
+      nukeElement.style.opacity = '0';
+      nukeElement.style.zIndex = '1';
+      nukeElement.style.transition = 'opacity 2s';
+      nukeElement.style.backgroundSize = 'contain';
+      nukeElement.style.backgroundPosition = 'center center';
+      nukeElement.style.backgroundRepeat = 'no-repeat';
+      nukeElement.style.pointerEvents = 'none';
+      document.body.appendChild(nukeElement);
+      console.log('Nuke image src:', nukeImage.src);
+      console.log('Nuke element created:', nukeElement);
+
+      nukeElement.offsetHeight;
+      
+      nukeElement.style.opacity = '0.7';
+
+      
+      setTimeout(() => {
+        nukeElement.style.opacity = '0.7'; 
+      }, 100);
+
+      //duracion de efecto
+      setTimeout(() => {
+        nukeElement.style.opacity = '0';
+      }, 3000); 
+
+      setTimeout(() => {
+        document.body.removeChild(nukeElement);
+      }, 3500);
+    }
 
     //-------------------------------------------------Game over---------------------------------------------------//
 
@@ -637,11 +752,11 @@
             const imgY = (value - 1) * 25;
             ctx.drawImage(
               blockImage,
-              0, imgY,       // Source x, y on the image
-              25, 25,        // Width and height of the source
-              x * block_size, // Destination x
-              y * block_size, // Destination y
-              block_size, block_size // Size to draw on the canvas
+              0, imgY,       
+              25, 25,        
+              x * block_size, 
+              y * block_size, 
+              block_size, block_size 
             );
           }
         });

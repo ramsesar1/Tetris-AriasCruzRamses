@@ -1,36 +1,101 @@
 body {
-    text-align: center;
-    margin-top:500px;
-    background-image: url('background.png'); 
-    background-size: cover; 
-    background-position: center; 
-    background-repeat: no-repeat; 
-  }
-  
-  canvas {
-    background-color: #000;
-    display: block;
-    margin: 0 auto;
-  }
-  
-  button {
-    display: block;
-    margin: 10px auto;
-    padding: 10px 20px;
-    font-size: 18px;
-    cursor: pointer;
-  }
-  
-  #next {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    background-color: #222;
-  }
-  
-  #hold {
-    position: absolute;
-    top: 10px;
-    left: 10px;
-    background-color: #222;
-  }
+  text-align: center;
+  background-image: 
+      url('images/backgrounds/normal/bg1tt.png'),  
+      url('images/backgrounds/normal/bg2t.png'), 
+      url('images/backgrounds/normal/bgskyt.jpeg'); 
+  background-size: 
+      100% auto,    
+      100% auto,  
+      cover;      
+  background-position: 
+      center bottom, 
+      center bottom,
+      center center; 
+  background-repeat: no-repeat, no-repeat, no-repeat;
+  min-height: 100vh; 
+  margin: 0; 
+  padding: 0; 
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  overflow: hidden; 
+}
+
+canvas {
+  background-color: transparent;
+  display: block;
+  margin-top: 20px; 
+  position: relative;
+  z-index: 2;
+}
+
+#tetris {
+  margin-top: auto; 
+  margin-bottom: 20px; 
+  position: relative;
+  z-index: 2;
+}
+
+#next {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background-color: rgba(34, 34, 34, 0.7); 
+  z-index: 3;
+}
+
+#hold {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  background-color: rgba(34, 34, 34, 0.7); 
+  z-index: 3;
+}
+
+#counter, #scoreCanvas {
+  position: absolute;
+  background-color: rgba(34, 34, 34, 0.7); 
+  z-index: 3;
+}
+
+#counter {
+  top: 160px;
+  left: 20px;
+}
+
+#scoreCanvas {
+  top: 160px;
+  right: 20px;
+}
+
+
+#flashOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: white;
+  opacity: 0;
+  display: none;
+  pointer-events: none;
+  transition: opacity 0.05s ease-in, opacity 0.45s ease-out;
+  z-index: 1000;
+}
+
+#nukeImage {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-size: contain;
+  background-position: center center;
+  background-repeat: no-repeat;
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 2s;
+}
