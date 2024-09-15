@@ -1,26 +1,52 @@
 body {
   text-align: center;
-  background-image: 
-      url('images/backgrounds/normal/bg1tt.png'),  
-      url('images/backgrounds/normal/bg2t.png'), 
-      url('images/backgrounds/normal/bgskyt.jpeg'); 
-  background-size: 
-      100% auto,    
-      100% auto,  
-      cover;      
-  background-position: 
-      center bottom, 
-      center bottom,
-      center center; 
-  background-repeat: no-repeat, no-repeat, no-repeat;
-  min-height: 100vh; 
-  margin: 0; 
-  padding: 0; 
+  margin: 0;
+  padding: 0;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
   align-items: center;
-  overflow: hidden; 
+  overflow: hidden;
+  position: relative;
+  min-height: 100vh;
+  background-color: #000; 
+}
+
+.background-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 200%; 
+  height: 100%;
+  background-repeat: repeat-x;
+  z-index: -3; 
+}
+
+.background-layer-1 {
+  background-image: url('images/backgrounds/normal/bg1tt.png'),  
+                    url('images/backgrounds/normal/bg2t.png');
+  background-size: 50% auto, 50% auto; 
+  background-position: left bottom, right bottom; 
+  background-attachment: fixed; 
+  animation: slideBackground1 30s linear infinite; 
+}
+
+.background-layer-2 {
+  background-image: url('images/backgrounds/normal/bgskyt.jpeg');
+  background-size: cover;
+  background-position: center center;
+  background-repeat: repeat-x;
+  animation: slideBackground2 20s linear infinite;
+}
+
+@keyframes slideBackground1 {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); } 
+}
+
+@keyframes slideBackground2 {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
 }
 
 canvas {
@@ -38,26 +64,20 @@ canvas {
   z-index: 2;
 }
 
-#next {
+#next, #hold, #counter, #scoreCanvas {
   position: absolute;
+  background-color: rgba(34, 34, 34, 0.7);
+  z-index: 3;
+}
+
+#next {
   top: 20px;
   right: 20px;
-  background-color: rgba(34, 34, 34, 0.7); 
-  z-index: 3;
 }
 
 #hold {
-  position: absolute;
   top: 20px;
   left: 20px;
-  background-color: rgba(34, 34, 34, 0.7); 
-  z-index: 3;
-}
-
-#counter, #scoreCanvas {
-  position: absolute;
-  background-color: rgba(34, 34, 34, 0.7); 
-  z-index: 3;
 }
 
 #counter {
@@ -69,7 +89,6 @@ canvas {
   top: 160px;
   right: 20px;
 }
-
 
 #flashOverlay {
   position: fixed;

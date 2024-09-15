@@ -14,6 +14,11 @@
   </style>
 </head>
 <body>
+  
+  <div class="background-container background-layer-2"></div>
+  <div class="background-container background-layer-1"></div>
+
+
   <canvas id="tetris" width="300" height="600"></canvas>
   <canvas id="next" width="120" height="120"></canvas>
   <canvas id="hold" width="120" height="120"></canvas>
@@ -32,6 +37,8 @@
   
   <audio id="gameover-music" src="gameover.mp3" loop></audio>
   <audio id="background-music" src="ingame.mp3" loop></audio>
+
+
 
   <script>
 
@@ -148,25 +155,6 @@
       });
     }
 
-
-
-
-    /*
-    function drawNextPiece(piece){
-      //limpiar el canvas de la siguiente
-      nextCtx.clearRect(0, 0, nextCanvas.width, nextCanvas.height);
-
-
-      piece.matrix.forEach((row, y) => {
-        row.forEach((value, x)=>{
-          if(value !== 0){
-            nextCtx.fillStyle = colors[value];
-            nextCtx.fillRect(x*block_size, y*block_size, block_size, block_size);
-          }
-        });
-      });
-    }
-    */
     //dibujar la pieza ahora con la textura de bloques
 
 
@@ -190,21 +178,6 @@
       });
     }
 
-
-
-    /*
-    function drawPiece(piece){
-      piece.matrix.forEach((row,y) => {
-        row.forEach((value,x) => {
-          if (value !== 0) {
-            ctx.fillStyle = colors[value];
-            ctx.fillRect((piece.pos.x+x)*block_size,(piece.pos.y + y)* block_size, block_size, block_size);
-
-          }
-        });
-      });
-    }
-    */
     //Agrega pieza
     function merge(grid,piece){
       piece.matrix.forEach((row, y) => {
@@ -412,26 +385,6 @@
       }
     }
 
-
-
-
-    /*
-    function drawHeldPiece(){
-      holdCtx.clearRect(0,0, holdCanvas.width, holdCanvas.height);
-      if (heldPiece){
-        heldPiece.matrix.forEach((row, y) => {
-          row.forEach((value,x) => {
-            if(value !== 0){
-              holdCtx.fillStyle = colors[value];
-              holdCtx.fillRect(x*block_size, y*block_size, block_size, block_size, block_size)
-            }
-          });
-        });
-      }
-    }
-    */
-
-
     //-----------------------------------actualizar juego--------------------*//
 
     let dropCounter = 0;
@@ -583,8 +536,7 @@
       
       for(let i = 0; i< powerUpCount; i++){
         counterCtx.drawImage(nukeIconImage, 10 + i * 40,50,30,30);
-   //     counterCtx.fillStyle = 'red';
-   //     counterCtx.fillRect(10 + i * 40, 50, 30, 30,);
+
       }
     }
 
@@ -726,12 +678,6 @@
     }
 
 
-
-
-
-
-
-
     //-----------------------------------cuadricula--------------------*//
 
 
@@ -762,19 +708,6 @@
         });
       });
     }
-    /*
-
-    function drawGrid(grid){
-      grid.forEach((row, y) => {
-        row.forEach((value, x) =>{
-          if(value !== 0){
-            ctx.fillStyle = colors[value];
-            ctx.fillRect(x*block_size, y * block_size, block_size, block_size);
-          }
-        });
-      });
-    }
-    */
 
     //iniciar el juego
     let grid = createGrid();

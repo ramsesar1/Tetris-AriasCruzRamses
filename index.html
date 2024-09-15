@@ -4,32 +4,30 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Atomic tetris</title>
-  <link rel="stylesheet" href="tetris.css">
-  <style>
-    canvas {
-      background-color: #000;
-      display: block;
-      margin: 0 auto;
-      border: 1px solid white;
-    }
-
-    body {
-      margin: 0;
-      overflow: hidden;
-    }
-  </style>
+  <link rel="stylesheet" href="index.css">
 </head>
 <body>
+
   <canvas id="start-screen" width="600" height="600"></canvas>
+  <div id="button-wrapper">
+    <div id="start-button">Press Start</div>
+  </div>
+
+  <div id="canvas-wrapper">
+    <canvas id="start-screen" width="600" height="600"></canvas>
+  </div>
+
+
 
   <audio id="background-music" src="start.mp3" preload="auto"></audio>
 
   <script>
     const canvas = document.getElementById('start-screen');
-    const ctx = canvas.getContext('2d');
+    const buttonOverlay = document.getElementById('start-button');
 
-    // titulo dentro del canvas
+    // título dentro del canvas
     function drawTitle() {
+      const ctx = canvas.getContext('2d');
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.font = '48px sans-serif';
       ctx.fillStyle = 'white';
@@ -37,50 +35,17 @@
       ctx.fillText('Atomic Tetris', canvas.width / 2, 150);
     }
 
-    function drawButton() {
-      const buttonX = canvas.width / 2 - 100;
-      const buttonY = 300;
-      const buttonWidth = 200;
-      const buttonHeight = 50;
-
-
-      ctx.fillStyle = '#444';
-      ctx.fillRect(buttonX, buttonY, buttonWidth, buttonHeight);
-
-      // boton
-      ctx.font = '24px sans-serif';
-      ctx.fillStyle = 'white';
-      ctx.fillText('Presiona Start', canvas.width / 2, buttonY + 35);
-
-      return { buttonX, buttonY, buttonWidth, buttonHeight };
-    }
-
-    function isInsideButton(x, y, button) {
-      return x > button.buttonX && x < button.buttonX + button.buttonWidth &&
-             y > button.buttonY && y < button.buttonY + button.buttonHeight;
-    }
-
-
-    canvas.addEventListener('click', (event) => {
-      const rect = canvas.getBoundingClientRect();
-      const x = event.clientX - rect.left;
-      const y = event.clientY - rect.top;
-
-      const button = drawButton();  
-
-      if (isInsideButton(x, y, button)) {
-        window.location.href = 'menu.html';  
-      }
+    buttonOverlay.addEventListener('click', () => {
+      window.location.href = 'menu.html';  
     });
 
     function drawScreen() {
       drawTitle();
-      drawButton();
     }
 
     drawScreen();
 
-    //funcionalidad del audio
+    // Funcionalidad del audio
     const backgroundMusic = document.getElementById('background-music');
     let musicStarted = false;
     let canPlayMusic = true;
