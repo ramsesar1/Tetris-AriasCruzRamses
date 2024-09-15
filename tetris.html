@@ -18,8 +18,20 @@
   <canvas id="next" width="120" height="120"></canvas>
   <canvas id="hold" width="120" height="120"></canvas>
   <canvas id="counter" width="180" height="120"></canvas>
+  <canvas id="scoreCanvas" width="180" height="120"></canvas>
 
+
+  <audio id="piecetouchdown-sfx" src="sounds/mp3/tankfire.mp3" ></audio>
+  <audio id="prepareforbattle-sfx" src="sounds/mp3/cached_v_prepare.mp3" ></audio>
+  <audio id="death-sfx" src="sounds/mp3/cached_tankexplode.mp3"></audio>
+  <audio id="nuke-sfx" src="sounds/mp3/cached_nukeblast.mp3"></audio>
+
+
+  
+  <audio id="gameover-music" src="gameover.mp3" loop></audio>
   <audio id="background-music" src="ingame.mp3" loop></audio>
+
+
 
   <script>
     const canvas = document.getElementById('tetris');
@@ -38,6 +50,14 @@
     const rows = 20;
     const cols = 10;
     const block_size = 30;
+
+
+    const pieceTouchdownSfx = document.getElementById('piecetouchdown-sfx');
+    const prepareForBattleSfx = document.getElementById('prepareforbattle-sfx');
+    const deathSfx = document.getElementById('death-sfx');
+    const nukeSfx = document.getElementById('nuke-sfx');
+    const gameOverMusic = document.getElementById('gameover-music');
+
 
 
     //color temporal de las piezas
@@ -224,8 +244,11 @@
       drawCounter();
     }
 
-    drawPowerUps();
+    if (linesCrealed > 0){
+      updateScore(linesCrealed);
+    }
 
+    drawPowerUps();
     return linesCrealed;
     }
 
@@ -236,20 +259,58 @@
       if (collide(grid,player)){
         player.pos.y--;
         merge(grid,player);
-        sweep(grid);
+        playPieceTouchdownSfx();
 
+        sweep(grid);
+        if(checkGameOver()){
+          gameOver();
+          return;
+        }
         
         player = nextPiece;
-
         nextPiece = createPiece();
-
         drawNextPiece(nextPiece);
-
         canHold = true;
       }
       dropCounter = 0;
     }
     
+
+
+    //-----------------------------------------tabla de puntajes----------------------------------------------//
+
+    let score = 0;
+    
+    const scoreCanvas = document.getElementById('scoreCanvas');
+    const scoreCtx = scoreCanvas.getContext('2d');
+
+    function updateScore(linesCrealed){
+      let points = 0;
+      if (linesCrealed === 1){
+        points = 100;
+      } else if (linesCrealed === 2){
+        points = 300;
+      } else if (linesCrealed === 3){
+        points = 500;
+      } else if (linesCrealed === 4){
+        points = 1000;
+     //   tetrisCount++;
+     //   addPowerUp();
+      }
+
+      score += points;
+      drawScore();
+
+    }
+
+    function drawScore(){
+      scoreCtx.clearRect(0,0, scoreCanvas.width, scoreCanvas.height);
+      scoreCtx.fillStyle = 'white';
+      scoreCtx.font = '24px Arial';
+      scoreCtx.fillText(`Score: ${score}`,10,30);
+    }
+
+
 
     //----------------------------------Contenedor de piezas----------------------------*//
 
@@ -298,6 +359,11 @@
     let speedIncreaseInterval = 3 * 60 * 1000;
 
     function update(time = 0){
+
+      if(!musicStarted){
+        playGameStartSfx();
+      }
+
       const deltaTime = time - lastTime;
       lastTime = time;
       dropCounter += deltaTime;
@@ -334,10 +400,32 @@
 
 
 
-    //---------------------------------logica de musica------------------------------------**//
+    //---------------------------------logica de musica y sonidos------------------------------------**//
 
     let musicStarted = false;
     let canPlayMusic = true;
+
+
+    //efectos de sonido
+
+    function playGameStartSfx() {
+      prepareForBattleSfx.play().catch(console.error);
+    }
+
+    function playPieceTouchdownSfx() {
+      pieceTouchdownSfx.play().catch(console.error);
+    }
+
+    function playGameOverSfx() {
+      deathSfx.play().then(() => {
+        gameOverMusic.play();  
+      }).catch(console.error);
+    }
+
+    function playNukeSfx() {
+      nukeSfx.play().catch(console.error);
+    }
+
 
     function attemptPlayMusic() {
       if (canPlayMusic && !musicStarted) {
@@ -404,6 +492,7 @@
         powerUpCount--;
         clearGrid();
         drawPowerUps();
+        playNukeSfx();
       }
     }
 
@@ -421,6 +510,69 @@
       }
     });
 
+    //-------------------------------------------------Game over---------------------------------------------------//
+
+    function checkGameOver(){
+      for(let x = 0; x<cols; x++){
+        if(grid[0][x] !== 0){
+          return true;
+        }
+      }
+      return false;
+    }
+
+    function gameOver(){
+      cancelAnimationFrame(update);
+      playGameOverSfx();  
+      drawGameOverScreen();
+    }
+
+    function drawGameOverScreen() {
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      function handleGameOverInput(event) {
+        if (event.key === 'r' || event.key === 'R') {
+          resetGame(); 
+        } else if (event.key === 'm' || event.key === 'M') {
+          window.location.href = 'menu.html';  
+        }
+      }
+      ctx.fillStyle = 'white';
+      ctx.font = '48px Arial';
+      ctx.fillText('Game Over', canvas.width / 2 - 100, canvas.height / 2 - 60);
+
+      ctx.font = '24px Arial';
+      ctx.fillText('Press "R" to Retry', canvas.width / 2 - 100, canvas.height / 2);
+      ctx.fillText('Press "M" for Menu', canvas.width / 2 - 100, canvas.height / 2 + 40);
+
+      document.addEventListener('keydown', handleGameOverInput, { once: true });
+    }
+
+
+    function handleGameOverInput(event) {
+      if (event.key === 'r' || event.key === 'R') {
+        resetGame();  
+      } else if (event.key === 'm' || event.key === 'M') {
+        window.location.href = 'menu.html';  
+      }
+    }
+
+
+
+    function resetGame(){
+      grid = createGrid();
+      player = createPiece();
+      nextPiece = createPiece();
+      score = 0;
+      tetrisCount = 0;
+      powerUpCount = 0;
+      dropInterval = 1000;
+      update();
+      drawScore();
+      drawCounter();
+      drawPowerUps();
+    }
 
 
 
