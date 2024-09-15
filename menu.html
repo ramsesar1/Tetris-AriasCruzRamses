@@ -3,29 +3,30 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Atomic tetris</title>
-  <link rel="stylesheet" href="tetris.css">
-  <style>
-    canvas {
-      display: block;
-      margin: 0 auto;
-    }
-  </style>
+  <title>Atomic Tetris</title>
+  <link rel="stylesheet" href="menu.css">
 </head>
 <body>
+
   <div class="background-container background-layer-2"></div>
   <div class="background-container background-layer-1"></div>
   
-  <canvas id="menu-canvas" width="800" height="600"></canvas>
-  <audio id="menu-music" src="Menu.mp3" loop></audio> 
+  <div id="canvas-wrapper">
+    <canvas id="menu-canvas" width="800" height="600"></canvas>
+  </div>
+  <audio id="menu-music" src="Menu.mp3" loop></audio>
+  <audio id="hover-sound" src="sounds/mp3/statbeep.mp3" preload="auto"></audio>
+
+
+
 
   <script>
     const canvas = document.getElementById('menu-canvas');
     const ctx = canvas.getContext('2d');
     const menuMusic = document.getElementById('menu-music');
+    const hoverSound = document.getElementById('hover-sound');
     let musicStarted = false;
 
-    //array de botones
     const buttons = [
       { text: 'Jugar normal', action: () => window.location.href = 'tetris.html' },
       { text: 'Jugar supervivencia', action: () => console.log('Supervivencia mode not implemented') },
@@ -44,8 +45,10 @@
       ctx.fillText('Menú Principal', canvas.width / 2, 100);
 
       buttons.forEach((button, index) => {
-        ctx.fillStyle = '#444';
-        ctx.fillRect(250, 150 + index * 70, 300, 50);
+        ctx.fillStyle = '#003366';
+        ctx.beginPath();
+        ctx.roundRect(250, 150 + index * 70, 300, 50, 25);
+        ctx.fill();
         
         ctx.fillStyle = '#fff';
         ctx.font = '24px Arial';
@@ -66,7 +69,21 @@
       });
     }
 
+    function handleMouseMove(event) {
+      const rect = canvas.getBoundingClientRect();
+      const x = event.clientX - rect.left;
+      const y = event.clientY - rect.top;
+
+      buttons.forEach((button, index) => {
+        if (x >= 250 && x <= 550 && y >= 150 + index * 70 && y <= 200 + index * 70) {
+          hoverSound.currentTime = 0;
+          hoverSound.play();
+        }
+      });
+    }
+
     canvas.addEventListener('click', handleClick);
+    canvas.addEventListener('mousemove', handleMouseMove);
 
     function attemptPlayMusic() {
       if (!musicStarted) {

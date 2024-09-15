@@ -42,6 +42,8 @@
 
   <script>
 
+
+
     const blockImage = new Image();
     blockImage.src = "images/icons/ladrillos.jpg"
 
@@ -235,7 +237,11 @@
         }
     });
 
-
+      document.addEventListener('keydown', event => {
+      if (event.key === 'p' || event.key === 'P') {
+        togglePause();
+      }
+    });
 
 
 
@@ -394,10 +400,17 @@
     let speedIncreaseInterval = 3 * 60 * 1000;
     let animationId;
 
+    let gameStartTime;
+    let elapsedTime = 0;
+    let isPaused = false;
+    let pauseStartTime;
+
     function update(time = 0){
 
       if(!musicStarted){
         playGameStartSfx();
+        gameStartTime = Date.now();
+
       }
 
       const deltaTime = time - lastTime;
@@ -405,11 +418,17 @@
       dropCounter += deltaTime;
       gameTime += deltaTime;
 
-      if (dropCounter > dropInterval){
+      if (!isPaused) {
+      const deltaTime = time - lastTime;
+      lastTime = time;
+      dropCounter += deltaTime;
+      elapsedTime = Date.now() - gameStartTime;
+
+      if (dropCounter > dropInterval) {
         drop();
       }
 
-      if (Math.floor(gameTime / speedIncreaseInterval) > Math.floor((gameTime - deltaTime)/ speedIncreaseInterval)){
+      if (Math.floor(elapsedTime / speedIncreaseInterval) > Math.floor((elapsedTime - deltaTime) / speedIncreaseInterval)) {
         increaseSpeed();
       }
 
@@ -418,12 +437,25 @@
       drawPiece(player);
       drawHeldPiece(nextPiece);
       drawHeldPiece();
-
+      drawTimer();
 
       animationId = requestAnimationFrame(update);
-
     }
-
+  }
+    
+    // Pausa
+    function togglePause() {
+      isPaused = !isPaused;
+      if (isPaused) {
+        cancelAnimationFrame(animationId);
+        pauseStartTime = Date.now();
+        backgroundMusic.pause();
+      } else {
+        gameStartTime += Date.now() - pauseStartTime;
+        backgroundMusic.play();
+        requestAnimationFrame(update);
+      }
+    }
 
     //aumentar velocidad
 
@@ -434,6 +466,18 @@
       }
     }
     
+
+    //Contador de tiempo
+    function drawTimer() {
+      const minutes = Math.floor(elapsedTime / 60000);
+      const seconds = Math.floor((elapsedTime % 60000) / 1000);
+      const timeString = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+      
+      counterCtx.fillStyle = 'white';
+      counterCtx.font = '20px Arial';
+      counterCtx.fillText(`Time: ${timeString}`, 10, 90);
+    }
+
 
 
 
@@ -515,7 +559,20 @@
       removeInteractionListeners();
     });
 
+
+
+
+
+
+
+
+
+
     //------------------------------------Bomba------------------------------------//
+
+
+    const powerUpSfx = new Audio('sounds/mp3/upgrade.mp3');  
+
 
     let powerUpCount = 0;
     const maxPowerUps = 3;
@@ -544,6 +601,7 @@
       if (powerUpCount < maxPowerUps){
         powerUpCount++;
         drawPowerUps();
+        powerUpSfx.play().catch(console.error);
       }
     }
 
@@ -640,6 +698,10 @@
       backgroundMusic.pause();
       playGameOverSfx();
 
+      const minutes = Math.floor(elapsedTime / 60000);
+      const seconds = Math.floor((elapsedTime % 60000) / 1000);
+      const timeString = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+
       setTimeout(() => {
         let choice = confirm(`Game Over!\nTu puntuacion: ${score}\n\nQuieres jugar otravez?`);
         
@@ -664,6 +726,9 @@
       gameOverMusic.currentTime = 0;
       backgroundMusic.currentTime = 0;
 
+      elapsedTime = 0;
+      gameStartTime = Date.now();
+      isPaused = false;
 
     //  update();
      clearCanvas();

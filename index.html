@@ -17,6 +17,7 @@
     <canvas id="start-screen" width="600" height="600"></canvas>
   </div>
 
+  <audio id="hover-sound" src="sounds/mp3/statbeep.mp3" preload="auto"></audio>
 
 
   <audio id="background-music" src="start.mp3" preload="auto"></audio>
@@ -24,6 +25,8 @@
   <script>
     const canvas = document.getElementById('start-screen');
     const buttonOverlay = document.getElementById('start-button');
+    const hoverSound = document.getElementById('hover-sound');
+
 
     // título dentro del canvas
     function drawTitle() {
@@ -99,6 +102,11 @@
         attemptPlayMusic();
       }, 5000);
     });
+
+    buttonOverlay.addEventListener('mouseenter',()=>{
+      hoverSound.play().catch(error => console.error('Hover sound error:', error));
+    });
+
   </script>
 </body>
 </html>
