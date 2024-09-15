@@ -10,7 +10,8 @@
 
   <div class="background-container background-layer-2"></div>
   <div class="background-container background-layer-1"></div>
-  
+  <img src="images/icons/Mainmenu-removebg-preview.png" alt="Menú Principal" id="menu-title">
+
   <div id="canvas-wrapper">
     <canvas id="menu-canvas" width="800" height="600"></canvas>
   </div>
@@ -39,10 +40,6 @@
       ctx.fillStyle = '#000';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      ctx.fillStyle = '#fff';
-      ctx.font = '48px Arial';
-      ctx.textAlign = 'center';
-      ctx.fillText('Menú Principal', canvas.width / 2, 100);
 
       buttons.forEach((button, index) => {
         ctx.fillStyle = '#003366';
