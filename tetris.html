@@ -355,6 +355,7 @@
     let lastTime = 0;
     let gameTime = 0;
     let speedIncreaseInterval = 3 * 60 * 1000;
+    let animationId;
 
     function update(time = 0){
 
@@ -382,7 +383,7 @@
       drawHeldPiece();
 
 
-      requestAnimationFrame(update);
+      animationId = requestAnimationFrame(update);
 
     }
 
@@ -554,11 +555,24 @@
       gameOverMusic.pause();
       gameOverMusic.currentTime = 0;
       backgroundMusic.currentTime = 0;
-      update();
+
+
+    //  update();
+     clearCanvas();
+      drawGrid(grid);
+      drawNextPiece(nextPiece);
+      drawHeldPiece();
       drawScore();
       drawCounter();
       drawPowerUps();
+      animationId = requestAnimationFrame(update);
+      attemptPlayMusic();
     }
+
+
+
+
+
 
 
 
@@ -598,7 +612,9 @@
     drawHeldPiece();
     drawCounter();
     drawPowerUps();
-    update();
+    animationId = requestAnimationFrame(update);
+
+//    update();
   </script>
   
 </body>
