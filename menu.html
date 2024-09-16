@@ -38,10 +38,9 @@
 
     const buttons = [
       { text: 'Jugar normal', action: () => window.location.href = 'tetris.html' },
-      { text: 'Jugar supervivencia', action: () => console.log('Supervivencia mode not implemented') },
+      { text: 'Jugar supervivencia', action: () => window.location.href = 'tetrisS.html' },
       { text: 'Como jugar', action: () => showHelpOverlay() },
-      { text: 'Créditos', action: () => console.log('Credits not implemented') },
-      { text: 'Salir', action: () => window.close() }
+      { text: 'Salir', action: () =>  window.location.href = 'index.html' }
     ];
 
     function showHelpOverlay() {

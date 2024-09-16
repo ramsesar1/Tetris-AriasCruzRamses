@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Atomic tetris</title>
+  <link rel="stylesheet" href ="tetrisS.css">
+<style>
+  canvas{
+    background-color: #000;
+    display: block;
+    margin: 0 auto;
+  }
+  </style>
+</head>
+<body>
+  
+  <div class="background-container background-layer-2"></div>
+  <div class="background-container background-layer-1"></div>
+
+
+  <canvas id="tetris" width="300" height="600"></canvas>
+  <canvas id="next" width="120" height="120"></canvas>
+  <canvas id="hold" width="120" height="120"></canvas>
+  <canvas id="counter" width="180" height="120"></canvas>
+  <canvas id="scoreCanvas" width="180" height="120"></canvas>
+
+  
+
+  <audio id="piecetouchdown-sfx" src="sounds/mp3/tankfire.mp3" ></audio>
+  <audio id="prepareforbattle-sfx" src="sounds/mp3/cached_v_prepare.mp3" ></audio>
+  <audio id="death-sfx" src="sounds/mp3/cached_tankexplode.mp3"></audio>
+  <audio id="nuke-sfx" src="sounds/mp3/cached_nukeblast.mp3"></audio>
+
+
+
+  
+  <audio id="gameover-music" src="gameover.mp3" loop></audio>
+  <audio id="background-music" src="ingame.mp3" loop></audio>
+
+
+
+  <script>
+
+
+
+    const blockImage = new Image();
+    blockImage.src = "images/icons/ladrillos.jpg"
+
+    const nukeIconImage = new Image();
+    nukeIconImage.src = "images/icons/nukeicon.png" 
+
+    const canvas = document.getElementById('tetris');
+    const ctx = canvas.getContext('2d');
+    const backgroundMusic = document.getElementById('background-music');
+
+    const nextCanvas = document.getElementById('next');
+    const nextCtx = nextCanvas.getContext('2d');
+
+    const holdCanvas = document.getElementById('hold');
+    const holdCtx = holdCanvas.getContext('2d');
+
+    const counterCanvas = document.getElementById('counter');
+    const counterCtx = counterCanvas.getContext('2d');
+
+    const rows = 20;
+    const cols = 10;
+    const block_size = 30;
+
+
+    const pieceTouchdownSfx = document.getElementById('piecetouchdown-sfx');
+    const prepareForBattleSfx = document.getElementById('prepareforbattle-sfx');
+    const deathSfx = document.getElementById('death-sfx');
+    const nukeSfx = document.getElementById('nuke-sfx');
+    const gameOverMusic = document.getElementById('gameover-music');
+
+
+
+    //color temporal de las piezas
+    const colors = [
+      null,
+      'cyan','blue','orange','yellow','green','purple','red'
+    ];
+
+    //piezas
+    const pieces =[
+    [[0,0,0,0],[1,1,1,1],[0,0,0,0],[0,0,0,0]], //pieza I
+    [[0,2,0],[2,2,2],[0,0,0]], //pieza T
+    [[3,3],[3,3]], // pieza cubo
+    [[0,4,4],[4,4,0],[0,0,0]], // pieza S
+    [[5,5,0],[0,5,5],[0,0,0]], // pieza Z
+    [[6,6,6],[6,0,0],[0,0,0]], // pieza L
+    [[7,7,7],[0,0,7],[0,0,0]], // pieza J
+    ];
+
+
+    //conteo de tetris en 0
+    let tetrisCount = 0;
+
+    //contador placeholder
+    function drawCounter(){
+      counterCtx.clearRect(0,0,counterCanvas.width, counterCanvas.height);
+      counterCtx.fillStyle = 'white';
+      counterCtx.font = '24px Arial';
+      counterCtx.fillText(`Tetris: ${tetrisCount}`, 10, 30);
+    }
+
+    //rotacion de piezas
+    function rotate(matrix){
+      const N = matrix.length;
+      const M = matrix[0].length;
+      const result = [];
+
+      for (let i = 0; i < M; i++){
+        result.push(new Array(N).fill(0));
+      }
+
+//      for (let i = 0; i < N; i++){
+//        result.push(new Array(N).fill(0));
+//      }
+      for(let y = 0; y < N; y++){
+        for(let x = 0; x < N; x++){
+          result[x][N - y - 1] = matrix[y][x];
+        }
+      }
+      return result;
+    }
+
+    //Crear pieza
+    function createPiece(){
+      const type = Math.floor(Math.random() * pieces.length);
+      return {
+        matrix: pieces[type],
+        pos: {x: Math.floor(cols/2)-1,y:0},
+      };
+    }
+
+    //----------------------------------Siguiente pieza----------------------*//
+
+    //dibujar pieza siguiente ahora con textura de bloques
+
+    function drawNextPiece(piece) {
+      nextCtx.clearRect(0, 0, nextCanvas.width, nextCanvas.height);
+      piece.matrix.forEach((row, y) => {
+        row.forEach((value, x) => {
+          if (value !== 0) {
+            const imgY = (value - 1) * 25; 
+            nextCtx.drawImage(
+              blockImage, 
+              0, imgY,  
+              25, 25,  
+              x * block_size, y * block_size,  
+              block_size, block_size         
+            );
+          }
+        });
+      });
+    }
+
+    //dibujar la pieza ahora con la textura de bloques
+
+
+    function drawPiece(piece) {
+      piece.matrix.forEach((row, y) => {
+        row.forEach((value, x) => {
+          if (value !== 0) {
+            // calcula los pixeles en Y 
+            const imgY = (value - 1) * 25;
+            
+            ctx.drawImage(
+              blockImage,
+              0, imgY,      
+              25, 25,        
+              (piece.pos.x + x) * block_size, 
+              (piece.pos.y + y) * block_size, 
+              block_size, block_size 
+            );
+          }
+        });
+      });
+    }
+
+    //Agrega pieza
+    function merge(grid,piece){
+      piece.matrix.forEach((row, y) => {
+        row.forEach((value, x)=> {
+          if(value !== 0){
+            grid[piece.pos.y + y][piece.pos.x + x] = value;
+          }
+        });
+      });
+    }
+
+
+
+    //limpiar el canvas
+    function clearCanvas(){
+      ctx.clearRect(0,0,canvas.width,canvas.height);
+    }
+
+
+
+    //colision de piezas
+    function collide(grid, piece){
+      for (let y = 0; y < piece.matrix.length; y++){
+        for(let x = 0; x < piece.matrix[y].length; x++){
+          if (piece.matrix[y][x] !== 0 && 
+            (grid[piece.pos.y + y] && grid[piece.pos.y + y][piece.pos.x + x]) !== 0){
+              return true;
+            }
+        }
+      }
+      return false;
+    }
+
+
+
+
+    //Controles
+    document.addEventListener('keydown', event => {
+        if (event.key === 'ArrowLeft' || event.key === 'a' || event.key === 'A') {
+            move(-1);  
+        }
+        else if (event.key === 'ArrowRight' || event.key === 'd' || event.key === 'D') {
+            move(1);   
+        }
+        else if (event.key === 'ArrowDown' || event.key === 's' || event.key === 'S') {
+            drop();    
+        }
+        else if (event.key === 'ArrowUp' || event.key === 'w' || event.key === 'W') {
+            player.matrix = rotate(player.matrix);  
+            if (collide(grid, player)) {
+                player.matrix = rotate(player.matrix); 
+            }
+        } else if (event.key === 'c' || event.key === 'C') {
+            holdPiece();  
+        }
+    });
+
+      document.addEventListener('keydown', event => {
+      if (event.key === 'p' || event.key === 'P') {
+        togglePause();
+      }
+    });
+
+
+
+    //movimiento horizontal
+    function move(dir){
+      player.pos.x += dir;
+      if (collide(grid, player)){
+        player.pos.x -= dir;
+      }
+    }
+
+
+    //eliminacion de hileras
+    
+    function sweep(grid){
+      let linesCrealed = 0;
+      for (let y = grid.length -1; y >= 0; y--){
+        let isRowComplete = true;
+        for(let x = 0; x<grid[y].length; x++){
+          if(grid[y][x] === 0){
+            isRowComplete = false;
+            break;
+          }
+        }
+        if (isRowComplete){
+        const row = grid.splice(y,1)[0].fill(0);
+        grid.unshift(row);
+        linesCrealed++;
+        y++;
+      }
+    }
+    if (linesCrealed === 4){
+      tetrisCount++;
+      addPowerUp();
+      drawCounter();
+    }
+
+    if (linesCrealed > 0){
+      updateScore(linesCrealed);
+    }
+
+    drawPowerUps();
+    return linesCrealed;
+    }
+
+
+    //movimiento vertical
+    function drop() {
+      player.pos.y++;
+      if (collide(grid,player)){
+        player.pos.y--;
+        merge(grid,player);
+        playPieceTouchdownSfx();
+
+        sweep(grid);
+        if(checkGameOver()){
+          gameOver();
+          return;
+        }
+        
+        player = nextPiece;
+        nextPiece = createPiece();
+        drawNextPiece(nextPiece);
+        canHold = true;
+      }
+      dropCounter = 0;
+    }
+    
+
+
+    //-----------------------------------------tabla de puntajes----------------------------------------------//
+
+    let score = 0;
+    
+    const scoreCanvas = document.getElementById('scoreCanvas');
+    const scoreCtx = scoreCanvas.getContext('2d');
+
+    function updateScore(linesCrealed){
+      let points = 0;
+      if (linesCrealed === 1){
+        points = 100;
+      } else if (linesCrealed === 2){
+        points = 300;
+      } else if (linesCrealed === 3){
+        points = 500;
+      } else if (linesCrealed === 4){
+        points = 1000;
+     //   tetrisCount++;
+     //   addPowerUp();
+      }
+
+      score += points;
+      drawScore();
+
+    }
+
+    function drawScore(){
+      scoreCtx.clearRect(0,0, scoreCanvas.width, scoreCanvas.height);
+      scoreCtx.fillStyle = 'white';
+      scoreCtx.font = '24px Arial';
+      scoreCtx.fillText(`Score: ${score}`,10,30);
+    }
+
+
+
+    //----------------------------------Contenedor de piezas----------------------------*//
+
+    let heldPiece = null;
+    let canHold = true;
+
+    function holdPiece(){
+      if(canHold){
+        if(heldPiece === null){
+          heldPiece = player;
+          player = nextPiece;
+          nextPiece = createPiece();
+        } else {
+          const temp = player;
+          player = heldPiece;
+          heldPiece = temp;
+        }
+        player.pos = {x: Math.floor(cols/2)-1, y:0};
+        canHold = false;
+        drawHeldPiece();
+      }
+    }
+
+    // pieza mantenia ahora con texturas
+
+    function drawHeldPiece() {
+      holdCtx.clearRect(0, 0, holdCanvas.width, holdCanvas.height);
+      if (heldPiece) {
+        heldPiece.matrix.forEach((row, y) => {
+          row.forEach((value, x) => {
+            if (value !== 0) {
+              const imgY = (value - 1) * 25; 
+              holdCtx.drawImage(
+                blockImage,
+                0, imgY,  
+                25, 25,   
+                x * block_size, y * block_size,  
+                block_size, block_size         
+              );
+            }
+          });
+        });
+      }
+    }
+
+    //-----------------------------------actualizar juego--------------------*//
+
+    let dropCounter = 0;
+    let dropInterval = 1000;
+    let lastTime = 0;
+    let gameTime = 0;
+    let speedIncreaseInterval = 25 * 1000;
+    let animationId;
+
+    let gameStartTime;
+    let elapsedTime = 0;
+    let isPaused = false;
+    let pauseStartTime;
+
+    function update(time = 0){
+
+      const deltaTime = time - lastTime;
+      lastTime = time;
+      dropCounter += deltaTime;
+      gameTime += deltaTime;
+
+      if(!musicStarted){
+        playGameStartSfx();
+        gameStartTime = Date.now();
+
+      }
+
+      if (!isPaused) {
+      const deltaTime = time - lastTime;
+      lastTime = time;
+      dropCounter += deltaTime;
+      elapsedTime = Date.now() - gameStartTime;
+
+      if (dropCounter > dropInterval) {
+        drop();
+      }
+
+      if (Math.floor(elapsedTime / speedIncreaseInterval) > Math.floor((elapsedTime - deltaTime) / speedIncreaseInterval)) {
+        increaseSpeed();
+      }
+      
+      if (elapsedTime - lastRowTime > incompleteRowInterval) {
+        addIncompleteRows(grid);
+        lastRowTime = elapsedTime;
+      }
+
+      clearCanvas();
+      drawGrid(grid);
+      drawPiece(player);
+      drawHeldPiece(nextPiece);
+      drawHeldPiece();
+      drawTimer();
+
+      animationId = requestAnimationFrame(update);
+    }
+  }
+    
+    // Pausa
+    function togglePause() {
+      isPaused = !isPaused;
+      if (isPaused) {
+        cancelAnimationFrame(animationId);
+        pauseStartTime = Date.now();
+        backgroundMusic.pause();
+      } else {
+        gameStartTime += Date.now() - pauseStartTime;
+        backgroundMusic.play();
+        requestAnimationFrame(update);
+      }
+    }
+
+    //aumentar velocidad
+
+    function increaseSpeed(){
+      if (dropInterval > 100){
+        dropInterval *= 0.9;
+        console.log('Velocidad aumentada:', dropInterval);
+      }
+    }
+    
+
+    //Contador de tiempo
+    function drawTimer() {
+      const minutes = Math.floor(elapsedTime / 60000);
+      const seconds = Math.floor((elapsedTime % 60000) / 1000);
+      const timeString = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+      
+      counterCtx.fillStyle = 'white';
+      counterCtx.font = '20px Arial';
+      counterCtx.fillText(`Time: ${timeString}`, 10, 90);
+    }
+
+    //-----------------------------------------------MODO SUPERVIVENCIA---------------------------------------------//
+
+    let incompleteRowInterval = 45 * 1000; 
+    let lastRowTime = 0;
+
+    
+    function addIncompleteRows(grid) {
+        const emptyRow = Array(cols).fill(0);
+        for (let i = 0; i < 3; i++) { 
+            const incompleteRow = emptyRow.slice(); 
+            for (let j = 0; j < cols; j++) {
+                if (Math.random() > 0.3) {
+                    incompleteRow[j] = Math.floor(Math.random() * 7) + 1; 
+                }
+            }
+            grid.push(incompleteRow.slice()); 
+            grid.shift(); 
+        }
+    }
+
+
+
+
+    //---------------------------------logica de musica y sonidos------------------------------------**//
+
+    let musicStarted = false;
+    let canPlayMusic = true;
+
+
+    //efectos de sonido
+
+    function playGameStartSfx() {
+      prepareForBattleSfx.play().catch(console.error);
+    }
+
+    function playPieceTouchdownSfx() {
+      pieceTouchdownSfx.play().catch(console.error);
+    }
+
+    function playGameOverSfx() {
+      deathSfx.play().then(() => {
+        if(!gameOverMusic.paused){
+          gameOverMusic.pause();
+        }
+        gameOverMusic.currentTime = 0;
+        gameOverMusic.play();  
+      }).catch(console.error);
+    }
+
+    function playNukeSfx() {
+      nukeSfx.play().catch(console.error);
+    }
+
+
+    function attemptPlayMusic() {
+      if (canPlayMusic && !musicStarted) {
+        backgroundMusic.play().then(() => {
+          musicStarted = true;
+          console.log('Game music started successfully');
+        }).catch(error => {
+          console.error('Error playing game music:', error);
+          canPlayMusic = false;
+          addInteractionListeners();
+        });
+      }
+    }
+
+    function addInteractionListeners() {
+      ['click', 'touchstart', 'keydown', 'mousemove'].forEach(eventType => {
+        document.addEventListener(eventType, playMusicOnInteraction, { once: true });
+      });
+    }
+
+    function playMusicOnInteraction() {
+      if (!musicStarted) {
+        canPlayMusic = true;
+        attemptPlayMusic();
+      }
+    }
+
+    function removeInteractionListeners() {
+      ['click', 'touchstart', 'keydown', 'mousemove'].forEach(eventType => {
+        document.removeEventListener(eventType, playMusicOnInteraction);
+      });
+    }
+
+    blockImage.onload = function() {
+      drawNextPiece(nextPiece);
+      drawHeldPiece();
+      drawCounter();
+      drawPowerUps();
+      animationId = requestAnimationFrame(update); 
+    };
+
+    window.addEventListener('load', attemptPlayMusic);
+
+    backgroundMusic.addEventListener('play', () => {
+      musicStarted = true;
+      removeInteractionListeners();
+    });
+
+
+
+
+
+
+
+
+
+
+    //------------------------------------Bomba------------------------------------//
+
+
+    const powerUpSfx = new Audio('sounds/mp3/upgrade.mp3');  
+
+
+    let powerUpCount = 0;
+    const maxPowerUps = 3;
+    
+    let nukeImage;
+    let flashOverlay;
+
+    nukeImage = new Image();
+    nukeImage.src = 'images/icons/nuke.png';
+    flashOverlay = document.createElement('div');
+    flashOverlay.id = 'flashOverlay';
+    document.body.appendChild(flashOverlay);
+
+
+
+    function drawPowerUps(){
+      counterCtx.clearRect(0,50,counterCanvas.width, counterCanvas.height);
+      
+      for(let i = 0; i< powerUpCount; i++){
+        counterCtx.drawImage(nukeIconImage, 10 + i * 40,50,30,30);
+
+      }
+    }
+
+    function addPowerUp(){
+      if (powerUpCount < maxPowerUps){
+        powerUpCount++;
+        drawPowerUps();
+        powerUpSfx.play().catch(console.error);
+      }
+    }
+
+    function usePowerUp(){
+      if(powerUpCount > 0){
+        powerUpCount--;
+        clearGrid();
+        drawPowerUps();
+        playNukeSfx();
+        flashEffect();
+        setTimeout(showNukeImage, 50);
+      }
+    }
+
+    function flashEffect() {
+      flashOverlay.style.display = 'block';
+      flashOverlay.style.opacity = '0.5';
+      setTimeout(() => {
+        flashOverlay.style.opacity = '0';
+      }, 50);
+      setTimeout(() => {
+        flashOverlay.style.display = 'none';
+      }, 500);
+    }
+
+    //limpia la cuadricula con la bomba
+    function clearGrid(){
+      grid.forEach((row, y) => {
+        row.fill(0);
+      });
+    }
+
+    //activar bomba
+    document.addEventListener('keydown', event => {
+      if (event.key === 'b' || event.key === 'B'){
+        usePowerUp();
+      }
+    });
+
+    function showNukeImage() {
+      const nukeElement = document.createElement('div');
+      nukeElement.id = 'nukeImage';
+      nukeElement.style.backgroundImage = `url(${nukeImage.src})`;
+      nukeElement.style.position = 'fixed';
+      nukeElement.style.top = '0';
+      nukeElement.style.left = '0';
+      nukeElement.style.width = '100%';
+      nukeElement.style.height = '100%';
+      nukeElement.style.opacity = '0';
+      nukeElement.style.zIndex = '1';
+      nukeElement.style.transition = 'opacity 2s';
+      nukeElement.style.backgroundSize = 'contain';
+      nukeElement.style.backgroundPosition = 'center center';
+      nukeElement.style.backgroundRepeat = 'no-repeat';
+      nukeElement.style.pointerEvents = 'none';
+      document.body.appendChild(nukeElement);
+      console.log('Nuke image src:', nukeImage.src);
+      console.log('Nuke element created:', nukeElement);
+
+      nukeElement.offsetHeight;
+      
+      nukeElement.style.opacity = '0.7';
+
+      
+      setTimeout(() => {
+        nukeElement.style.opacity = '0.7'; 
+      }, 100);
+
+      //duracion de efecto
+      setTimeout(() => {
+        nukeElement.style.opacity = '0';
+      }, 3000); 
+
+      setTimeout(() => {
+        document.body.removeChild(nukeElement);
+      }, 3500);
+    }
+
+    //-------------------------------------------------Game over---------------------------------------------------//
+
+    function checkGameOver() {
+      for (let x = 0; x < cols; x++) {
+        if (grid[0][x] !== 0) {
+          console.log('condicion de gameover lograda'); 
+          return true;
+        }
+      }
+      return false;
+    }
+
+    function gameOver() {
+      console.log('llamada a gameover'); 
+      cancelAnimationFrame(update);
+      backgroundMusic.pause();
+      playGameOverSfx();
+
+      const minutes = Math.floor(elapsedTime / 60000);
+      const seconds = Math.floor((elapsedTime % 60000) / 1000);
+      const timeString = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+
+      setTimeout(() => {
+        let choice = confirm(`Game Over!\nTu puntuacion: ${score}\n\nQuieres jugar otravez?`);
+        
+        if (choice) {
+          resetGame();
+        } else {
+          window.location.href = 'menu.html'; 
+        }
+      }, 100);
+    }
+
+    function resetGame(){
+      grid = createGrid();
+      player = createPiece();
+      nextPiece = createPiece();
+      score = 0;
+      tetrisCount = 0;
+      powerUpCount = 0;
+      dropInterval = 1000;
+      musicStarted = false;
+      gameOverMusic.pause();
+      gameOverMusic.currentTime = 0;
+      backgroundMusic.currentTime = 0;
+
+      elapsedTime = 0;
+      gameStartTime = Date.now();
+      isPaused = false;
+
+    //  update();
+     clearCanvas();
+      drawGrid(grid);
+      drawNextPiece(nextPiece);
+      drawHeldPiece();
+      drawScore();
+      drawCounter();
+      drawPowerUps();
+      animationId = requestAnimationFrame(update);
+      attemptPlayMusic();
+    }
+
+
+    //-----------------------------------cuadricula--------------------*//
+
+
+
+    //cuadricula
+    function createGrid(){
+      const grid = [];
+      while (grid.length < rows){
+        grid.push(new Array(cols).fill(0));
+      }
+      return grid;
+    }
+
+    function drawGrid(grid) {
+      grid.forEach((row, y) => {
+        row.forEach((value, x) => {
+          if (value !== 0) {
+            const imgY = (value - 1) * 25;
+            ctx.drawImage(
+              blockImage,
+              0, imgY,       
+              25, 25,        
+              x * block_size, 
+              y * block_size, 
+              block_size, block_size 
+            );
+          }
+        });
+      });
+    }
+
+    //iniciar el juego
+    let grid = createGrid();
+    let player = createPiece();
+    let nextPiece = createPiece();
+    
+    attemptPlayMusic();
+
+    drawNextPiece(nextPiece);
+    drawHeldPiece();
+    drawCounter();
+    drawPowerUps();
+    animationId = requestAnimationFrame(update);
+
+//    update();
+  </script>
+  
+</body>
+</html>
