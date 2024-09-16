@@ -8,14 +8,14 @@ body {
     align-items: center;
     position: relative;
     min-height: 100vh;
-    background-color: #000; 
-}
+    background-color: #000;
+  }
   
   .background-container {
     position: absolute;
     top: 0;
     left: 0;
-    width: 200%; 
+    width: 200%;
     height: 100%;
     background-repeat: repeat-x;
     z-index: -3; 
@@ -24,10 +24,10 @@ body {
   .background-layer-1 {
     background-image: url('images/backgrounds/menu/bgd1.png'),  
                       url('images/backgrounds/menu/bgd2.png');
-    background-size: 50% auto, 50% auto; 
-    background-position: left bottom, right bottom; 
-    background-attachment: fixed; 
-    animation: slideBackground1 30s linear infinite; 
+    background-size: 50% auto, 50% auto;
+    background-position: left bottom, right bottom;
+    background-attachment: fixed;
+    animation: slideBackground1 30s linear infinite;
   }
   
   .background-layer-2 {
@@ -40,7 +40,7 @@ body {
   
   @keyframes slideBackground1 {
     from { transform: translateX(0); }
-    to { transform: translateX(-50%); } 
+    to { transform: translateX(-50%); }
   }
   
   @keyframes slideBackground2 {
@@ -50,31 +50,30 @@ body {
   
   #canvas-wrapper {
     position: absolute;
-    top: 0px; 
+    top: 0px;
     left: 50%;
     transform: translateX(-50%);
-    width: 820px; 
+    width: 820px;
     height: 620px;
-    background-color: grey; 
-    border-radius: 10px; 
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.7); 
+    background-color: grey;
+    border-radius: 10px;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.7);
     z-index: 1; 
-}
-
-canvas {
+  }
+  
+  canvas {
     width: 800px;
     height: 600px;
-    border-radius: 10px; 
-    background: radial-gradient(circle, #e0e0e0, #a9a9a9); 
+    border-radius: 10px;
+    background: radial-gradient(circle, #e0e0e0, #a9a9a9);
     display: block;
     margin: 0 auto;
-    border: none; 
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5); 
-    position: relative;
+    border: none;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
     z-index: 2; 
-}
-
-#menu-title {
+  }
+  
+  #menu-title {
     position: absolute;
     top: 20px;
     left: 50%;
@@ -83,70 +82,37 @@ canvas {
     max-height: 100px;
     width: auto;
     height: auto;
-    z-index: 3;
-}
+    z-index: 3; 
+  }
   
   .button {
     position: relative;
-    width: 300px; 
+    width: 300px;
     height: 50px;
-    background-color: #003366; 
+    background-color: #003366;
     color: white;
     border: none;
-    border-radius: 25px; 
+    border-radius: 25px;
     font-size: 24px;
     text-align: center;
-    line-height: 50px; 
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.7); 
+    line-height: 50px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.7);
     cursor: pointer;
     margin: 10px auto;
     display: block;
   }
   
   .button:hover {
-    background-color: #002244; 
+    background-color: #002244;
   }
   
-  .button:hover::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: url('hover_sound.mp3') no-repeat;
-    opacity: 0;
-  }
-  
-  .button:hover::after {
-    opacity: 1;
-  }
-  
-  #flashOverlay {
+  #help-overlay {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: white;
-    opacity: 0;
-    display: none;
-    pointer-events: none;
-    transition: opacity 0.05s ease-in, opacity 0.45s ease-out;
-    z-index: 1000;
+    background-color: rgba(0, 0, 0, 0.8); 
+    z-index: 10;
   }
   
-  #nukeImage {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-size: contain;
-    background-position: center center;
-    background-repeat: no-repeat;
-    z-index: 1;
-    pointer-events: none;
-    opacity: 0;
-    transition: opacity 2s;
-  }

@@ -10,8 +10,16 @@
 
   <div class="background-container background-layer-2"></div>
   <div class="background-container background-layer-1"></div>
-  <img src="images/icons/Mainmenu-removebg-preview.png" alt="Menú Principal" id="menu-title">
 
+  <img src="images/icons/Mainmenu-removebg-preview.png" alt="Menú Principal" id="menu-title">
+  
+  <div id="help-overlay" style="display: none;">
+    <div id="help-container">
+      <img src="images/icons/help.png" alt="Game Help" id="help-image">
+      <button id="close-help" class="button">Cerrar</button>
+    </div>
+  </div>
+  
   <div id="canvas-wrapper">
     <canvas id="menu-canvas" width="800" height="600"></canvas>
   </div>
@@ -31,10 +39,22 @@
     const buttons = [
       { text: 'Jugar normal', action: () => window.location.href = 'tetris.html' },
       { text: 'Jugar supervivencia', action: () => console.log('Supervivencia mode not implemented') },
-      { text: 'Como jugar', action: () => console.log('How to play not implemented') },
+      { text: 'Como jugar', action: () => showHelpOverlay() },
       { text: 'Créditos', action: () => console.log('Credits not implemented') },
       { text: 'Salir', action: () => window.close() }
     ];
+
+    function showHelpOverlay() {
+      const helpOverlay = document.getElementById('help-overlay');
+      helpOverlay.style.display = 'flex'; 
+    }
+
+    const closeHelpButton = document.getElementById('close-help');
+    closeHelpButton.addEventListener('click', () => {
+      const helpOverlay = document.getElementById('help-overlay');
+      helpOverlay.style.display = 'none'; 
+    });
+    
 
     function drawMenu() {
       ctx.fillStyle = '#000';
